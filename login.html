@@ -1,13 +1,14 @@
 <!doctype html>
-<html lang="en" class="h-full bg-[#fcfcfc]">
+<html lang="en" class="h-full">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Kenyan Academy — Login</title>
-    <!-- Core Supabase CDN Library (Loads first) -->
+    <title>Login — Kenyan Academy</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Supabase JS SDK — MUST be loaded before script.js -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <link rel="stylesheet" href="output.css" />
   </head>
+
   <body
     class="h-full font-sans antialiased text-slate-900 flex flex-col selection:bg-slate-900 selection:text-white"
   >
@@ -42,11 +43,6 @@
               class="hover:text-slate-900 transition-colors py-1"
               >Sign Up</a
             >
-            <!-- <a
-              href="dashboard.html"
-              class="hover:text-slate-900 transition-colors py-1"
-              >Dashboard</a
-            > -->
             <a
               href="#"
               id="authAction"
@@ -60,6 +56,7 @@
 
     <!-- CONTENT PANEL -->
     <div class="flex flex-1 min-h-0">
+      <!-- LEFT PANEL -->
       <div
         class="relative hidden w-0 flex-1 lg:block bg-slate-900 border-r border-slate-800"
       >
@@ -88,6 +85,7 @@
         </div>
       </div>
 
+      <!-- RIGHT PANEL — FORM -->
       <div
         class="flex flex-1 flex-col justify-center px-6 py-12 sm:px-12 lg:flex-none lg:w-[480px] xl:w-[540px]"
       >
@@ -163,10 +161,12 @@
                 <label
                   for="remember-me"
                   class="ml-3 block text-sm text-slate-400 font-light cursor-pointer select-none"
-                  >Keep me authenticated on this device</label
                 >
+                  Keep me authenticated on this device
+                </label>
               </div>
 
+              <!-- Submit button — Google button is injected above this by script.js -->
               <div class="pt-2">
                 <button
                   type="submit"
@@ -181,7 +181,7 @@
       </div>
     </div>
 
-    <!-- Centralized Logic Engine Script (Only loaded once here) -->
+    <!-- script.js must come AFTER Supabase SDK -->
     <script src="script.js" defer></script>
   </body>
 </html>
