@@ -4,12 +4,14 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Kenyan Academy — Login</title>
+    <!-- Core Supabase CDN Library (Loads first) -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link rel="stylesheet" href="output.css" />
   </head>
   <body
     class="h-full font-sans antialiased text-slate-900 flex flex-col selection:bg-slate-900 selection:text-white"
   >
+    <!-- NAVIGATION BAR -->
     <nav
       class="bg-white text-slate-900 border-b border-slate-100 sticky top-0 z-50 backdrop-blur-md bg-white/90"
     >
@@ -21,7 +23,6 @@
               >Kenyan Academy</span
             >
           </div>
-
           <div
             class="flex space-x-6 sm:space-x-10 text-xs font-medium uppercase tracking-wider text-slate-500"
           >
@@ -57,6 +58,7 @@
       </div>
     </nav>
 
+    <!-- CONTENT PANEL -->
     <div class="flex flex-1 min-h-0">
       <div
         class="relative hidden w-0 flex-1 lg:block bg-slate-900 border-r border-slate-800"
@@ -76,8 +78,8 @@
               "Logic is the foundation of structural clarity."
             </h1>
             <p class="text-sm text-slate-400 font-light leading-relaxed">
-              Access your personalized dashboard to manage student records,
-              review track progress, and organize dynamic learning arrays.
+              Access your personalized dashboard to manage student records and
+              track progress arrays.
             </p>
           </div>
           <p class="text-xs font-mono text-slate-500 uppercase tracking-wider">
@@ -105,6 +107,7 @@
           </div>
 
           <div class="mt-10">
+            <!-- Secure Identification Hook -->
             <form id="loginForm" class="space-y-6">
               <div>
                 <label
@@ -161,9 +164,8 @@
                 <label
                   for="remember-me"
                   class="ml-3 block text-sm text-slate-400 font-light cursor-pointer select-none"
+                  >Keep me authenticated on this device</label
                 >
-                  Keep me authenticated on this device
-                </label>
               </div>
 
               <div class="pt-2">
@@ -180,6 +182,7 @@
       </div>
     </div>
 
+    <!-- Centralized Logic Engine Script (Only loaded once here) -->
     <script src="script.js" defer></script>
   </body>
 </html>

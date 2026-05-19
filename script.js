@@ -1,17 +1,31 @@
 /**
  * KENYAN ACADEMY — CENTRAL MANAGEMENT ENGINE (2026)
- * Complete Supabase Production Authentication & Live Cloud DB Storage Integration
+ * Complete Bulletproof Cloud Database Storage & Production Auth Pipeline
  */
 
-// 1. SUPABASE CLIENT INITIALIZATION NETWORK
+// GLOBAL INITIALIZATION & CDN PROTECTION NETWORK
 const SUPABASE_URL = "https://yztdkzwkdvvvnwgxhqhl.supabase.co";
 const SUPABASE_ANON_KEY =
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inl6dGRrendrZHZ2dm53Z3hocWhsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg5NzcxMjMsImV4cCI6MjA5NDU1MzEyM30.iFP77TiIpMNYSY7IaAJPz_rH3ADD4ymVp5iiPOje6kY";
 
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+let supabase = null;
+
+try {
+  if (window.supabase) {
+    supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  } else {
+    console.error(
+      "Initialization Alert: Supabase library object is missing from the global window scope.",
+    );
+  }
+} catch (initError) {
+  console.error(
+    "Critical Exception caught during global client creation:",
+    initError,
+  );
+}
 
 document.addEventListener("DOMContentLoaded", async () => {
-  // Structural target sniffing to prevent runtime execution errors
   const studentForm = document.getElementById("studentForm");
   const targetLoginForm = document.getElementById("loginForm");
   const targetSignUpForm = document.getElementById("signUpForm");
@@ -20,23 +34,24 @@ document.addEventListener("DOMContentLoaded", async () => {
   const isLoginPage = document.title.includes("Login");
   const isDashboardPage = document.title.includes("Dashboard");
 
-  // Navbar UI Control Nodes
   const loginLink = document.getElementById("loginLink");
   const signupLink = document.getElementById("signupLink");
   const authAction = document.getElementById("authAction");
 
-  // Handle session checks safely inside a try/catch block
   let session = null;
-  try {
-    const { data } = await supabase.auth.getSession();
-    session = data?.session || null;
-  } catch (e) {
-    console.error("Failed to recover active session matrix:", e);
+  if (supabase) {
+    try {
+      const { data } = await supabase.auth.getSession();
+      session = data?.session || null;
+    } catch (sessionError) {
+      console.error(
+        "Failed to recover active authentication session token:",
+        sessionError,
+      );
+    }
   }
 
-  // ==========================================
-  // 2. NAVBAR UI STATE CONTROLLER
-  // ==========================================
+  // NAVBAR UI STATE CONTROLLER
   if (session) {
     if (loginLink) loginLink.classList.add("hidden");
     if (signupLink) signupLink.classList.add("hidden");
@@ -46,10 +61,11 @@ document.addEventListener("DOMContentLoaded", async () => {
         e.preventDefault();
         e.stopPropagation();
 
+        if (!supabase) return;
         try {
           await supabase.auth.signOut();
           alert("You have been securely logged out of your session.");
-          window.location.replace("login.html"); // FIXED: Relative Path
+          window.location.replace("login.html");
         } catch (signOutError) {
           alert(`Sign Out Error: ${signOutError.message}`);
         }
@@ -57,34 +73,25 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   }
 
-  // ==========================================
-  // 3. SECURITY GUARD: SESSION PROTECTION GATE
-  // ==========================================
+  // SECURITY GUARD: SESSION PROTECTION GATE
   if (isDashboardPage) {
     if (!session) {
       console.warn(
         "Unauthorized access flagged. Redirecting to authentication gate...",
       );
-      window.location.replace("login.html"); // FIXED: Relative Path
+      window.location.replace("login.html");
       return;
     }
-    console.log(
-      "Session verified successfully. Welcome back:",
-      session.user.email,
-    );
   }
 
-  // ==========================================
-  // 4. CLOUD DATABASE ROSTER CONTROLLER (DASHBOARD)
-  // ==========================================
-  if (studentForm && session) {
+  // CLOUD DATABASE ROSTER CONTROLLER (DASHBOARD)
+  if (studentForm && session && supabase) {
     const studentNameInput = document.getElementById("studentName");
     const studentRoleInput = document.getElementById("studentRole");
     const rosterGrid = document.getElementById("rosterGrid");
     const emptyState = document.getElementById("emptyState");
     const rosterCount = document.getElementById("rosterCount");
 
-    // ASYNCHRONOUS ENGINE: FETCH LIVE ENTRIES FROM POSTGRES
     async function fetchCloudRoster() {
       try {
         const { data: students, error } = await supabase
@@ -123,13 +130,13 @@ document.addEventListener("DOMContentLoaded", async () => {
           rosterGrid.appendChild(itemCard);
         });
       } catch (err) {
-        console.error("Data reading exception:", err.message);
+        console.error("Data reading exception caught:", err.message);
       }
     }
 
-    // ASYNCHRONOUS ENGINE: INSERT NEW DATA ENTRY INTO POSTGRES
     studentForm.addEventListener("submit", async function (e) {
       e.preventDefault();
+      e.stopPropagation();
 
       const nameValue = studentNameInput.value.trim();
       const courseValue = studentRoleInput.value.trim();
@@ -156,7 +163,6 @@ document.addEventListener("DOMContentLoaded", async () => {
       }
     });
 
-    // ASYNCHRONOUS ENGINE: PURGE DATA ENTRY FROM POSTGRES
     window.deleteCloudRecord = async function (recordId) {
       if (
         !confirm(
@@ -182,15 +188,16 @@ document.addEventListener("DOMContentLoaded", async () => {
     await fetchCloudRoster();
   }
 
-  // ==========================================
-  // 5. SECURE AUTHENTICATION PIPELINES
-  // ==========================================
-
   // LOGIN FLOW HANDLER
   if (targetLoginForm && isLoginPage) {
     targetLoginForm.addEventListener("submit", async (e) => {
       e.preventDefault();
       e.stopPropagation();
+
+      if (!supabase) {
+        alert("Database engine down. Please reload the webpage.");
+        return;
+      }
 
       const email = document.getElementById("email").value.trim();
       const password = document.getElementById("password").value;
@@ -200,22 +207,16 @@ document.addEventListener("DOMContentLoaded", async () => {
       submitBtn.disabled = true;
 
       try {
-        const { data, error: signInError } =
-          await supabase.auth.signInWithPassword({
-            email: email,
-            password: password,
-          });
+        const { error: signInError } = await supabase.auth.signInWithPassword({
+          email: email,
+          password: password,
+        });
 
         if (signInError) throw signInError;
 
-        console.log(
-          "Authentication successful, modifying location reference pointer...",
-        );
-        window.location.replace("dashboard.html"); // FIXED: Relative Path
+        window.location.replace("dashboard.html");
       } catch (err) {
         alert(`Authentication Exception: ${err.message}`);
-        console.error("Supabase Operation Failed gracefully:", err);
-
         submitBtn.innerText = "Sign In";
         submitBtn.disabled = false;
       }
@@ -228,6 +229,11 @@ document.addEventListener("DOMContentLoaded", async () => {
       e.preventDefault();
       e.stopPropagation();
 
+      if (!supabase) {
+        alert("Database engine down. Please reload the webpage.");
+        return;
+      }
+
       const email = document.getElementById("email").value.trim();
       const password = document.getElementById("password").value;
       const name = document.getElementById("name").value.trim();
@@ -237,7 +243,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       submitBtn.disabled = true;
 
       try {
-        const { data, error: signUpError } = await supabase.auth.signUp({
+        const { error: signUpError } = await supabase.auth.signUp({
           email: email,
           password: password,
           options: {
@@ -247,14 +253,10 @@ document.addEventListener("DOMContentLoaded", async () => {
 
         if (signUpError) throw signUpError;
 
-        alert(
-          "Account provisioned successfully! Check your email inbox or proceed to sign in.",
-        );
-        window.location.replace("login.html"); // FIXED: Relative Path
+        alert("Account provisioned successfully! Check your inbox or sign in.");
+        window.location.replace("login.html");
       } catch (err) {
         alert(`Authentication Exception: ${err.message}`);
-        console.error("Supabase Operation Failed gracefully:", err);
-
         submitBtn.innerText = "Register Credentials";
         submitBtn.disabled = false;
       }
