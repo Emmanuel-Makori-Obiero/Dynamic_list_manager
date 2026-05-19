@@ -49,7 +49,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         try {
           await supabase.auth.signOut();
           alert("You have been securely logged out of your session.");
-          window.location.replace("login.html");
+          window.location.replace("login.html"); // FIXED: Relative Path
         } catch (signOutError) {
           alert(`Sign Out Error: ${signOutError.message}`);
         }
@@ -65,7 +65,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       console.warn(
         "Unauthorized access flagged. Redirecting to authentication gate...",
       );
-      window.location.replace("login.html");
+      window.location.replace("login.html"); // FIXED: Relative Path
       return;
     }
     console.log(
@@ -189,7 +189,6 @@ document.addEventListener("DOMContentLoaded", async () => {
   // LOGIN FLOW HANDLER
   if (targetLoginForm && isLoginPage) {
     targetLoginForm.addEventListener("submit", async (e) => {
-      // CRITICAL: Stop the browser from executing native HTML POST submissions instantly
       e.preventDefault();
       e.stopPropagation();
 
@@ -212,7 +211,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         console.log(
           "Authentication successful, modifying location reference pointer...",
         );
-        window.location.replace("dashboard.html");
+        window.location.replace("dashboard.html"); // FIXED: Relative Path
       } catch (err) {
         alert(`Authentication Exception: ${err.message}`);
         console.error("Supabase Operation Failed gracefully:", err);
@@ -226,7 +225,6 @@ document.addEventListener("DOMContentLoaded", async () => {
   // SIGN UP FLOW HANDLER
   if (targetSignUpForm && isSignUpPage) {
     targetSignUpForm.addEventListener("submit", async (e) => {
-      // CRITICAL: Stop the browser from executing native HTML POST submissions instantly
       e.preventDefault();
       e.stopPropagation();
 
@@ -252,7 +250,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         alert(
           "Account provisioned successfully! Check your email inbox or proceed to sign in.",
         );
-        window.location.replace("login.html");
+        window.location.replace("login.html"); // FIXED: Relative Path
       } catch (err) {
         alert(`Authentication Exception: ${err.message}`);
         console.error("Supabase Operation Failed gracefully:", err);
