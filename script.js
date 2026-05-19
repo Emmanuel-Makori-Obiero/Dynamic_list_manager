@@ -13,7 +13,9 @@ const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 document.addEventListener("DOMContentLoaded", async () => {
   // Structural target sniffing to prevent runtime execution errors
   const studentForm = document.getElementById("studentForm");
-  const loginForm = document.querySelector("form");
+  const targetLoginForm = document.getElementById("loginForm");
+  const targetSignUpForm = document.getElementById("signUpForm");
+
   const isSignUpPage = document.title.includes("Sign Up");
   const isLoginPage = document.title.includes("Login");
   const isDashboardPage = document.title.includes("Dashboard");
@@ -144,7 +146,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         if (error) throw error;
 
         studentForm.reset();
-        await fetchCloudRoster(); // Reload interface instantly
+        await fetchCloudRoster();
         studentNameInput.focus();
       } catch (err) {
         alert(`Database Write Failure: ${err.message}`);
@@ -171,68 +173,91 @@ document.addEventListener("DOMContentLoaded", async () => {
 
         if (error) throw error;
 
-        await fetchCloudRoster(); // Refresh screen array
+        await fetchCloudRoster();
       } catch (err) {
         alert(`Database Deletion Failure: ${err.message}`);
       }
     };
 
-    // Initial launch cascade execution
     await fetchCloudRoster();
   }
 
   // ==========================================
   // 5. SECURE AUTHENTICATION PIPELINES
   // ==========================================
-  if (loginForm && (isSignUpPage || isLoginPage)) {
-    loginForm.addEventListener("submit", async (e) => {
+
+  // LOGIN FLOW HANDLER
+  if (targetLoginForm && isLoginPage) {
+    targetLoginForm.addEventListener("submit", async (e) => {
+      // CRITICAL: Stop the browser from executing native HTML POST submissions instantly
       e.preventDefault();
       e.stopPropagation();
 
       const email = document.getElementById("email").value.trim();
       const password = document.getElementById("password").value;
-      const submitBtn = loginForm.querySelector('button[type="submit"]');
+      const submitBtn = targetLoginForm.querySelector('button[type="submit"]');
 
       submitBtn.innerText = "Processing secure request...";
       submitBtn.disabled = true;
 
       try {
-        if (isSignUpPage) {
-          const name = document.getElementById("name").value.trim();
-
-          const { data, error: signUpError } = await supabase.auth.signUp({
+        const { data, error: signInError } =
+          await supabase.auth.signInWithPassword({
             email: email,
             password: password,
-            options: {
-              data: { full_name: name },
-            },
           });
 
-          if (signUpError) throw signUpError;
+        if (signInError) throw signInError;
 
-          alert(
-            "Account provisioned successfully! Check your email inbox or proceed to sign in.",
-          );
-          window.location.replace("login.html");
-        } else if (isLoginPage) {
-          const { data, error: signInError } =
-            await supabase.auth.signInWithPassword({
-              email: email,
-              password: password,
-            });
-
-          if (signInError) throw signInError;
-
-          console.log(
-            "Authentication successful, modifying location reference pointer...",
-          );
-          window.location.replace("dashboard.html");
-        }
+        console.log(
+          "Authentication successful, modifying location reference pointer...",
+        );
+        window.location.replace("dashboard.html");
       } catch (err) {
         alert(`Authentication Exception: ${err.message}`);
         console.error("Supabase Operation Failed gracefully:", err);
 
-        submitBtn.innerText = isSignUpPage ? "Register Credentials" : "Sign In";
+        submitBtn.innerText = "Sign In";
+        submitBtn.disabled = false;
+      }
+    });
+  }
+
+  // SIGN UP FLOW HANDLER
+  if (targetSignUpForm && isSignUpPage) {
+    targetSignUpForm.addEventListener("submit", async (e) => {
+      // CRITICAL: Stop the browser from executing native HTML POST submissions instantly
+      e.preventDefault();
+      e.stopPropagation();
+
+      const email = document.getElementById("email").value.trim();
+      const password = document.getElementById("password").value;
+      const name = document.getElementById("name").value.trim();
+      const submitBtn = targetSignUpForm.querySelector('button[type="submit"]');
+
+      submitBtn.innerText = "Processing secure request...";
+      submitBtn.disabled = true;
+
+      try {
+        const { data, error: signUpError } = await supabase.auth.signUp({
+          email: email,
+          password: password,
+          options: {
+            data: { full_name: name },
+          },
+        });
+
+        if (signUpError) throw signUpError;
+
+        alert(
+          "Account provisioned successfully! Check your email inbox or proceed to sign in.",
+        );
+        window.location.replace("login.html");
+      } catch (err) {
+        alert(`Authentication Exception: ${err.message}`);
+        console.error("Supabase Operation Failed gracefully:", err);
+
+        submitBtn.innerText = "Register Credentials";
         submitBtn.disabled = false;
       }
     });
